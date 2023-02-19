@@ -1,0 +1,16 @@
+.cell {
+    border: 1px solid black;
+    height: 35px;
+    width: 35px;
+    /* margin: 1px; */
+    font-size: 10px;
+}
+
+.snake-here {
+    background-color: black;
+    color: #fff;
+}
+
+.food-here {
+    background-color: rgb(179, 238, 0);
+}
