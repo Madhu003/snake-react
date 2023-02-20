@@ -1,11 +1,11 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import Cell from "../cell/Cell";
 import "./board.css";
 
 const matrixGlobal = [];
-const boardSize = 25;
+const boardSize = 15;
 const initSnakePosition = [
-  ...new Array(15)
+  ...new Array(5)
     .fill("")
     .map((_, index) => ({ coordinate: { x: 0, y: index } })),
 ];
@@ -20,15 +20,15 @@ for (let i = 0; i < boardSize; i++) {
 
 let snakeDirection = 2;
 let intervalId = null;
-
+let foddLocationGlobal = []
 function Board() {
   const [matrix, setMatrix] = useState(matrixGlobal);
   const [snake, setSnake] = useState(initSnakePosition);
   const [foodLocation, setFoodLocation] = useState([]);
+  const [toggleUpdateBoard, setToggleUpdateBoard] = useState(true)
 
   useEffect(() => {
-    updateBoard();
-
+    // useInterval(() => updateBoard(), 100)
     document.addEventListener("keydown", (e) => {
       e.stopPropagation();
       if (e.code == "ArrowUp" && snakeDirection % 2 == 0) {
@@ -39,10 +39,14 @@ function Board() {
         snakeDirection = 3;
       } else if (e.code == "ArrowLeft" && snakeDirection % 2 != 0) {
         snakeDirection = 4;
-      }
+      }  else if (e.code == "Space") {
+        setToggleUpdateBoard(!!toggleUpdateBoard)
+      } 
     });
 
     generateNewFood();
+
+    setTimeout(() => updateBoard(), 200);
   }, []);
 
   useEffect(() => {
@@ -57,6 +61,7 @@ function Board() {
     });
 
     setMatrix(JSON.parse(JSON.stringify(matrix)));
+    console.log("food location updated", foodLocation, matrix)
   }, [foodLocation]);
 
   const generateNewFood = () => {
@@ -67,8 +72,9 @@ function Board() {
       console.log("run again");
       generateNewFood();
     } else {
-      console.log([x, y]);
+      console.log("new food", [x, y]);
       setFoodLocation([x, y]);
+      foddLocationGlobal = [x, y]
     }
   };
 
@@ -80,10 +86,10 @@ function Board() {
     });
   };
 
-  const markSnake = (updatedSnake) => {
+  const markSnake = () => {
     matrix.forEach((row, i) => {
       row.forEach((cell, j) => {
-        updatedSnake.forEach((snakeCell) => {
+        snake.forEach((snakeCell) => {
           if (snakeCell.coordinate.x == i && snakeCell.coordinate.y == j)
             cell.isSnakeHere = true;
         });
@@ -120,34 +126,41 @@ function Board() {
       matrix[newCell.coordinate.x][newCell.coordinate.y].isSnakeHere
     ) {
       clearInterval(intervalId);
-      return alert("You are out !");
+      return console.log("You are out !");
     }
 
-    console.log(foodLocation);
+    console.log(foodLocation, foddLocationGlobal);
     if (
-      newCell.coordinate.x == foodLocation[0] &&
-      newCell.coordinate.y == foodLocation[1]
+      newCell.coordinate.x == foddLocationGlobal[0] &&
+      newCell.coordinate.y == foddLocationGlobal[1]
     ) {
-      debugger;
       generateNewFood();
     } else {
       snake.pop();
     }
 
     snake.unshift(newCell);
-
-    return snake;
   };
 
-  function updateBoard() {
-    intervalId = setInterval(function () {
-      clearBoard();
-      const updatedSnake = moveSnake();
-      markSnake(updatedSnake);
+  const waitFor = (time) => {
+    return new Promise((resolve, reeject) => {
+      setTimeout(() => {
+        resolve();
+      }, time);
+    });
+  };
 
-      setSnake([...updatedSnake]);
-      setMatrix(JSON.parse(JSON.stringify(matrix)));
-    }, 100);
+  async function updateBoard() {
+    while (toggleUpdateBoard) {
+      clearBoard();
+      moveSnake();
+      markSnake();
+      
+      setSnake([...snake]);
+      setMatrix([...matrix]);
+
+      await waitFor(250);
+    }
   }
 
   return (

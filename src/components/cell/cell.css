@@ -1,9 +1,11 @@
 .cell {
-    border: 1px solid black;
+    /* border: 1px solid black; */
     height: 35px;
     width: 35px;
     /* margin: 1px; */
     font-size: 10px;
+    background-color: rgb(215, 215, 215);
+
 }
 
 .snake-here {

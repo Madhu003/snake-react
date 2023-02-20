@@ -8,7 +8,7 @@ export default function Cell({ cell }) {
           cell.isFoodHere ? "food-here" : ""
         }`}
       >
-        {cell.coordinate.x}, {cell.coordinate.y}
+        {/* {cell.coordinate.x}, {cell.coordinate.y} */}
       </div>
     );
 }
